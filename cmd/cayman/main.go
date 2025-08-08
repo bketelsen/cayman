@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"fmt"
 	"log"
 	"log/slog"
 	"net"
@@ -22,9 +21,7 @@ import (
 )
 
 const (
-	topicRandomNumbers = "numbers"
-	topicMetrics       = "metrics"
-	topicSystem        = "system"
+	topicSystem = "system"
 )
 
 func newSSE() *sse.Server {
@@ -39,22 +36,8 @@ func newSSE() *sse.Server {
 			return getLogger(r.Context())
 		},
 		OnSession: func(w http.ResponseWriter, r *http.Request) (topics []string, permitted bool) {
-			topics = r.URL.Query()["topic"]
-			slog.Info("new session", "topics", topics)
-			for _, topic := range topics {
-				if topic != topicRandomNumbers && topic != topicMetrics {
-					fmt.Fprintf(w, "invalid topic %q; supported are %q, %q", topic, topicRandomNumbers, topicMetrics)
+			slog.Info("new root sse session")
 
-					// NOTE: if you are returning false to reject the subscription, we strongly recommend writing
-					// your own response code. Clients will receive a 200 code otherwise, which may be confusing.
-					w.WriteHeader(http.StatusBadRequest)
-					return nil, false
-				}
-			}
-			if len(topics) == 0 {
-				// Provide default topics, if none are given.
-				topics = []string{topicRandomNumbers}
-			}
 			// add system topic
 			topics = append(topics, topicSystem)
 
@@ -77,6 +60,7 @@ func main() {
 	handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug})
 	logger := slog.New(handler)
 
+	// root sse handler, currently only used for "close" message
 	sseHandler := newSSE()
 
 	app := echo.New()

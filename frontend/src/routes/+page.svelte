@@ -5,6 +5,8 @@
 
   import Header from "$lib/components/header.svelte";
 
+  // TODO: Move this to a utility file
+  // This function converts bytes to a human-readable format
   function humanizeMemory(bytes: number): string {
     if (bytes === 0) return "0 Bytes";
 
@@ -32,6 +34,8 @@
     buff/cache     ( Buffers + Cached + SReclaimable )
 
    */
+  // TODO: this is all broken/wrong... need to verify calculations
+  // to match `top` output
   let freeMemory = $derived(() => {
     if (mem) {
       return mem.total_bytes - mem.used_bytes;
