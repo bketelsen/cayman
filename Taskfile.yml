@@ -1,0 +1,44 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  default:
+    desc: Build and run frontend and backend in development mode
+    deps:
+      - dev:frontend
+      - dev:go
+
+  build:
+    desc: Build backend with embedded frontend
+    deps:
+      - build:frontend
+    cmds:
+      - go build -o bin/cayman ./cmd/cayman
+    silent: true
+
+  build:frontend:
+    desc: Build frontend for production
+    dir: frontend
+    cmds:
+      - npm run build
+    silent: true
+
+  dev:frontend:
+    desc: Run frontend in development mode with live reload
+    dir: frontend
+    cmds:
+      - npm run dev
+
+  dev:go:
+    desc: Run backend in development mode with live reload
+    cmds:
+      - go tool air
+
+  run:
+    desc: Run the built backend binary
+    deps:
+      - build
+    cmds:
+      - bin/cayman
+    silent: true
