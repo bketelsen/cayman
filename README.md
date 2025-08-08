@@ -198,7 +198,7 @@ The application supports the following command-line flags:
 - `GET /api/stop` - Gracefully stop the server
 
 ### Server-Sent Events
-- `GET /api/host/events` - Real-time system metrics stream
+- `GET /api/dashboard/events` - Real-time system metrics stream for dashboard page
 
 Events published:
 - `cpu` - CPU usage percentage
