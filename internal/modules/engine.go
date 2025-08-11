@@ -5,7 +5,13 @@ import (
 	"cayman/frontend"
 	_ "cayman/internal/modules/dashboard"
 	_ "cayman/internal/modules/docker"
+	_ "cayman/internal/modules/host"
+	_ "cayman/internal/modules/logs"
+	_ "cayman/internal/modules/metrics"
 	_ "cayman/internal/modules/podman"
+	_ "cayman/internal/modules/storage"
+	_ "cayman/internal/modules/system"
+	"strings"
 
 	"cayman/internal/system"
 	"context"
@@ -76,6 +82,25 @@ func (e *Engine) Start(ctx context.Context) error {
 
 	systemSSEHandler := system.GetSSEServer()
 	api.GET("/systemevents", echo.WrapHandler(systemSSEHandler))
+
+	api.GET("/modules", func(c echo.Context) error {
+		// Logic to handle module listing
+		modules := make([]string, 0, len(cayman.EnabledModules))
+		for _, m := range cayman.EnabledModules {
+			modules = append(modules, m.Name())
+		}
+		return c.JSON(http.StatusOK, modules)
+	})
+	api.GET("/modules/:name/enabled", func(c echo.Context) error {
+		// Logic to handle module listing
+		name := c.Param("name")
+		for _, m := range cayman.EnabledModules {
+			if strings.EqualFold(m.Name(), name) {
+				return c.JSON(http.StatusOK, true)
+			}
+		}
+		return c.JSON(http.StatusOK, false)
+	})
 	// register api and sse routes for modules here
 	//dashboard.RegisterRoutes(ctx, api)
 	slog.Info("registering modules")

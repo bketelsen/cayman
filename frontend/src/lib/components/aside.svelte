@@ -10,6 +10,7 @@
         ServerIcon,
     } from "@lucide/svelte";
     import { page } from "$app/state";
+
 </script>
 
 <aside class="drawer-side z-10">
@@ -22,7 +23,7 @@
             <TreePalm class="h-8 w-8" />
             Cayman
         </div>
-        <ul class="menu w-full">
+        <ul class="menu text-base-content bg-base-200 w-full">
             <li>
                 <a
                     href="/"
@@ -56,6 +57,7 @@
             <li>
                 <a
                     href="/storage"
+                    aria-disabled="true"
                     class={page.url.pathname === "/storage"
                         ? "menu-active"
                         : ""}
@@ -120,12 +122,15 @@
             <li>
                 <a
                     href="/logs"
-                    class={page.url.pathname === "/logs" ? "menu-active" : ""}
-                    aria-current={page.url.pathname === "/logs"}
-                >
-                    <Logs class="h-5 w-5" />
-                    Logs
-                </a>
+                    class={page.url.pathname === "/logs"
+                        ? "menu-active"
+                        : ""}
+                        aria-current={page.url.pathname === "/logs"}
+                    >
+                        <Logs class="h-5 w-5" />
+                        Logs
+                    </a>
+
             </li>
             <li>
                 <a

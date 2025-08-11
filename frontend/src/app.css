@@ -3,12 +3,12 @@
 @plugin '@tailwindcss/typography';
 
 @plugin "daisyui" {
-    themes: false;
+    themes: nord --default, dracula --prefersdark;
 }
 
 @plugin "@iconify/tailwind4";
 
-@plugin "daisyui/theme" {
+/* @plugin "daisyui/theme" {
     name: "light";
     default: true;
     prefersdark: false;
@@ -76,4 +76,4 @@
     --border: 1px;
     --depth: 1;
     --noise: 0;
-}
+} */
