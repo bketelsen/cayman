@@ -60,7 +60,7 @@
 
   onMount(() => {
     // Initial data fetch
-    fetch("/api/host/current")
+    fetch("/api/dashboard/current")
       .then((response) => response.json())
       .then((data) => {
         load = data.load;
@@ -74,7 +74,7 @@
       });
 
     // Set up SSE connection
-    eventSource = new EventSource("/api/host/events");
+    eventSource = new EventSource("/api/dashboard/events");
     eventSource.addEventListener("load", (event) => {
       load = JSON.parse(event.data) as Load;
     });

@@ -1,4 +1,4 @@
-package dashboard
+package podman
 
 import (
 	"log/slog"
@@ -9,7 +9,7 @@ import (
 	"github.com/tmaxmax/go-sse"
 )
 
-var topicHost = "dashboard"
+var topicHost = "podman"
 
 func newSSE() *sse.Server {
 	rp, _ := sse.NewValidReplayer(time.Minute*5, true)

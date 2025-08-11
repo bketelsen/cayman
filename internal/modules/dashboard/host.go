@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	"cayman"
 	"cayman/internal/data/hardware"
 	"cayman/internal/data/system"
 	"cayman/internal/data/systemd"
@@ -14,13 +15,88 @@ import (
 	"github.com/tmaxmax/go-sse"
 )
 
-type HostHandler struct {
+var (
+	_          cayman.Module = (*DashboardModule)(nil)
+	dashModule *DashboardModule
+)
+
+func init() {
+	dashModule = &DashboardModule{}
+	cayman.RegisterModule(dashModule)
+}
+
+type DashboardModule struct {
 	ctx        context.Context
 	sseHandler *sse.Server
 	info       *HostState
 }
 
-func (h *HostHandler) Poll() {
+func (h *DashboardModule) ShouldEnable() bool {
+	return true
+}
+func (h *DashboardModule) Topics() []string {
+	return []string{topicHost}
+}
+
+func (h *DashboardModule) Name() string {
+	return "Dashboard"
+}
+
+func (h *DashboardModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Group) {
+	h.ctx = ctx
+	h.sseHandler = newSSE()
+	routeGroup := parentRoute.Group("/dashboard")
+	go h.Poll()
+	routeGroup.GET("/events", echo.WrapHandler(h.sseHandler))
+	routeGroup.GET("/current", h.hostInfoHandler)
+	// cpustat, err := hardware.Info()
+	// if err != nil {
+	// 	slog.Error("failed to get cpu info", "error", err)
+	// }
+	//slog.Info("CPU Info", "info", cpustat, "count", len(cpustat))
+	failed, active, _ := systemd.UnitOverview(ctx)
+
+	sysinfo, err := system.HostInfo()
+	if err != nil {
+		slog.Error("failed to get host info", "error", err)
+	}
+	mem, err := sysinfo.Memory()
+	if err != nil {
+		slog.Error("failed to get memory info", "error", err)
+	}
+	var tmpLoad Load
+	if loadaverage, ok := sysinfo.(types.LoadAverage); ok {
+		loadavg, err := loadaverage.LoadAverage()
+		if err != nil {
+			slog.Error("failed to get load", "error", err)
+
+		}
+		tmpLoad = Load{
+			Load1:  loadavg.One,
+			Load5:  loadavg.Five,
+			Load15: loadavg.Fifteen,
+		}
+	}
+	domain, err := sysinfo.FQDNWithContext(ctx)
+	if err != nil {
+		slog.Error("failed to get FQDN", "error", err)
+	}
+	hi := &HostState{
+		FQDN: domain,
+		UnitStatus: UnitStatus{
+			FailedCount: failed,
+			ActiveCount: active,
+		},
+
+		Load:       tmpLoad,
+		HostInfo:   sysinfo.Info(),
+		MemoryInfo: *mem,
+	}
+	h.info = hi
+
+}
+
+func (h *DashboardModule) Poll() {
 	ticker := time.NewTicker(3 * time.Second)
 	defer ticker.Stop()
 
@@ -35,7 +111,7 @@ func (h *HostHandler) Poll() {
 	}
 }
 
-func (h *HostHandler) usage() {
+func (h *DashboardModule) usage() {
 	usage, err := hardware.CPUUsage(h.ctx)
 	if err != nil {
 		slog.Error("failed to get cpu usage", "error", err)
@@ -53,7 +129,7 @@ func (h *HostHandler) usage() {
 	_ = h.sseHandler.Publish(e, topicHost)
 }
 
-func (h *HostHandler) stats() {
+func (h *DashboardModule) stats() {
 	sysinfo, err := system.HostInfo()
 	if err != nil {
 		slog.Error("failed to get host info", "error", err)
@@ -97,68 +173,7 @@ func (h *HostHandler) stats() {
 
 	_ = h.sseHandler.Publish(e, topicHost)
 }
-
-func NewHostHandler(ctx context.Context) *HostHandler {
-
-	cpustat, err := hardware.Info()
-	if err != nil {
-		slog.Error("failed to get cpu info", "error", err)
-	}
-	slog.Info("CPU Info", "info", cpustat, "count", len(cpustat))
-	failed, active, _ := systemd.UnitOverview(ctx)
-
-	sysinfo, err := system.HostInfo()
-	if err != nil {
-		slog.Error("failed to get host info", "error", err)
-	}
-	mem, err := sysinfo.Memory()
-	if err != nil {
-		slog.Error("failed to get memory info", "error", err)
-	}
-	var tmpLoad Load
-	if loadaverage, ok := sysinfo.(types.LoadAverage); ok {
-		loadavg, err := loadaverage.LoadAverage()
-		if err != nil {
-			slog.Error("failed to get load", "error", err)
-
-		}
-		tmpLoad = Load{
-			Load1:  loadavg.One,
-			Load5:  loadavg.Five,
-			Load15: loadavg.Fifteen,
-		}
-	}
-	domain, err := sysinfo.FQDNWithContext(ctx)
-	if err != nil {
-		slog.Error("failed to get FQDN", "error", err)
-	}
-	hi := &HostState{
-		FQDN: domain,
-		UnitStatus: UnitStatus{
-			FailedCount: failed,
-			ActiveCount: active,
-		},
-
-		Load:       tmpLoad,
-		HostInfo:   sysinfo.Info(),
-		MemoryInfo: *mem,
-	}
-	return &HostHandler{
-		ctx:        ctx,
-		sseHandler: newSSE(),
-		info:       hi,
-	}
-}
-
-func RegisterRoutes(ctx context.Context, parentRoute *echo.Group) {
-	routeGroup := parentRoute.Group("/host")
-	hostHandler := NewHostHandler(ctx)
-	go hostHandler.Poll()
-	routeGroup.GET("/events", echo.WrapHandler(hostHandler.sseHandler))
-	routeGroup.GET("/current", hostHandler.hostInfoHandler)
-}
-
-func (h *HostHandler) hostInfoHandler(c echo.Context) error {
+func (h *DashboardModule) hostInfoHandler(c echo.Context) error {
 
 	return c.JSON(200, h.info)
 }
