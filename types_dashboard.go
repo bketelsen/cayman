@@ -1,15 +1,13 @@
-package dashboard
+package cayman
 
 import "github.com/elastic/go-sysinfo/types"
 
+// HostState is used on the dashboard
 type HostState struct {
-	Hostname string `json:"hostname"`
-	FQDN     string `json:"fqdn"` // Include FQDN
-	Load     Load   `json:"load"`
-	CPU      int    `json:"cpu"` // Include CPU usage
-	// CPUHistory *modules.RingBuffer[int] `json:"cpu_history"` // Include CPU usage history
-	// Details       *host.InfoStat           `json:"details"`     // Include details for the page
-	// Mem           *mem.VirtualMemoryStat   `json:"mem"`
+	Hostname   string     `json:"hostname"`
+	FQDN       string     `json:"fqdn"` // Include FQDN
+	Load       Load       `json:"load"`
+	CPU        int        `json:"cpu"`         // Include CPU usage
 	UnitStatus UnitStatus `json:"unit_status"` // Include unit status
 	// CPUInfo       cpu.InfoStat             `json:"cpu_info"`       // Include CPU info
 	PhysicalCores int                  `json:"physical_cores"` // Include physical cores

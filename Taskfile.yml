@@ -6,12 +6,14 @@ tasks:
   default:
     desc: Build and run frontend and backend in development mode
     deps:
+      - build:types
       - dev:frontend
       - dev:go
 
   build:
     desc: Build backend with embedded frontend
     deps:
+      - build:types
       - build:frontend
     cmds:
       - go build -o bin/cayman ./cmd/cayman
@@ -22,6 +24,16 @@ tasks:
     dir: frontend
     cmds:
       - npm run build
+    silent: true
+
+  build:types:
+    desc: Generate TypeScript types from Go code
+    sources:
+      - ./*.go
+    generates:
+      - ./frontend/src/lib/*.ts
+    cmds:
+      - go tool tygo generate
     silent: true
 
   dev:frontend:

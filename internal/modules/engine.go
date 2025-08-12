@@ -85,8 +85,8 @@ func (e *Engine) Start(ctx context.Context) error {
 
 	api.GET("/modules", func(c echo.Context) error {
 		// Logic to handle module listing
-		modules := make([]string, 0, len(cayman.EnabledModules))
-		for _, m := range cayman.EnabledModules {
+		modules := make([]string, 0, len(cayman.AvailableModules))
+		for _, m := range cayman.AvailableModules {
 			modules = append(modules, m.Name())
 		}
 		return c.JSON(http.StatusOK, modules)

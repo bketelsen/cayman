@@ -28,7 +28,7 @@ func init() {
 type DashboardModule struct {
 	ctx        context.Context
 	sseHandler *sse.Server
-	info       *HostState
+	info       *cayman.HostState
 }
 
 func (h *DashboardModule) ShouldEnable() bool {
@@ -54,8 +54,10 @@ func (h *DashboardModule) RegisterRoutes(ctx context.Context, parentRoute *echo.
 	// 	slog.Error("failed to get cpu info", "error", err)
 	// }
 	//slog.Info("CPU Info", "info", cpustat, "count", len(cpustat))
-	failed, active, _ := systemd.UnitOverview(ctx)
-
+	failed, active, err := systemd.UnitOverview(ctx)
+	if err != nil {
+		slog.Error("failed to get systemd unit status", "error", err)
+	}
 	sysinfo, err := system.HostInfo()
 	if err != nil {
 		slog.Error("failed to get host info", "error", err)
@@ -64,14 +66,14 @@ func (h *DashboardModule) RegisterRoutes(ctx context.Context, parentRoute *echo.
 	if err != nil {
 		slog.Error("failed to get memory info", "error", err)
 	}
-	var tmpLoad Load
+	var tmpLoad cayman.Load
 	if loadaverage, ok := sysinfo.(types.LoadAverage); ok {
 		loadavg, err := loadaverage.LoadAverage()
 		if err != nil {
 			slog.Error("failed to get load", "error", err)
 
 		}
-		tmpLoad = Load{
+		tmpLoad = cayman.Load{
 			Load1:  loadavg.One,
 			Load5:  loadavg.Five,
 			Load15: loadavg.Fifteen,
@@ -81,9 +83,9 @@ func (h *DashboardModule) RegisterRoutes(ctx context.Context, parentRoute *echo.
 	if err != nil {
 		slog.Error("failed to get FQDN", "error", err)
 	}
-	hi := &HostState{
+	hi := &cayman.HostState{
 		FQDN: domain,
-		UnitStatus: UnitStatus{
+		UnitStatus: cayman.UnitStatus{
 			FailedCount: failed,
 			ActiveCount: active,
 		},
@@ -134,23 +136,26 @@ func (h *DashboardModule) stats() {
 	if err != nil {
 		slog.Error("failed to get host info", "error", err)
 	}
+	h.info.HostInfo = sysinfo.Info()
 	mem, err := sysinfo.Memory()
 	if err != nil {
 		slog.Error("failed to get memory info", "error", err)
 	}
-	var tmpLoad Load
+	h.info.MemoryInfo = *mem
+	var tmpLoad cayman.Load
 	if loadaverage, ok := sysinfo.(types.LoadAverage); ok {
 		loadavg, err := loadaverage.LoadAverage()
 		if err != nil {
 			slog.Error("failed to get load", "error", err)
 
 		}
-		tmpLoad = Load{
+		tmpLoad = cayman.Load{
 			Load1:  loadavg.One,
 			Load5:  loadavg.Five,
 			Load15: loadavg.Fifteen,
 		}
 	}
+	h.info.Load = tmpLoad
 	e := &sse.Message{
 		Type: sse.Type("mem"),
 	}
