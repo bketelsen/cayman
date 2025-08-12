@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type {  Load } from "$lib/cayman";
+  import type { Load } from "$lib/cayman";
   import type { HostMemoryInfo } from "$lib/sysinfo";
 
   import { globalData, dashboardData } from "$lib/state.svelte";
- 
+
   import Header from "$lib/components/header.svelte";
 
   // TODO: Move this to a utility file
@@ -19,8 +19,7 @@
     return parseFloat((bytes / Math.pow(k, i)).toFixed(0)) + " " + sizes[i];
   }
 
-
-   let eventSource = $state<EventSource | undefined>(undefined);
+  let eventSource = $state<EventSource | undefined>(undefined);
   // break this out into its own state so we can use it in the header
   let hostname = $state<string | null>(null);
   // let mem = $state<HostMemoryInfo | null>(null);
@@ -37,13 +36,19 @@
   // to match `top` output
   let freeMemory = $derived(() => {
     if (dashboardData.memory_info) {
-      return dashboardData.memory_info.total_bytes - dashboardData.memory_info.used_bytes;
+      return (
+        dashboardData.memory_info.total_bytes -
+        dashboardData.memory_info.used_bytes
+      );
     }
     return null;
   });
   let usedMemory = $derived(() => {
     if (dashboardData.memory_info) {
-      return dashboardData.memory_info.total_bytes - dashboardData.memory_info.available_bytes;
+      return (
+        dashboardData.memory_info.total_bytes -
+        dashboardData.memory_info.available_bytes
+      );
     }
     return null;
   });
@@ -51,7 +56,9 @@
     if (dashboardData.memory_info) {
       const used = usedMemory();
       if (used !== null) {
-        return ((used / dashboardData.memory_info.total_bytes) * 100).toFixed(0);
+        return ((used / dashboardData.memory_info.total_bytes) * 100).toFixed(
+          0,
+        );
       }
     }
     return null;
@@ -102,7 +109,9 @@
 >
   <div class="stat">
     <div class="stat-title">CPU Usage</div>
-    <div class="stat-value">{dashboardData.cpu !== null ? `${dashboardData.cpu}%` : "Loading..."}</div>
+    <div class="stat-value">
+      {dashboardData.cpu !== null ? `${dashboardData.cpu}%` : "Loading..."}
+    </div>
     <div class="stat-desc">Current CPU usage percentage</div>
   </div>
   <div class="stat">
@@ -150,9 +159,7 @@
       <dd
         class="pt-3 pb-3 col-start-2 col-span-2 border-t border-primary/70 border-t border-primary/70 py-3 nth-2:border-none text-right"
       >
-        {globalData.host?.os
-          ? globalData.host.os.family
-          : "Loading..."}
+        {globalData.host?.os ? globalData.host.os.family : "Loading..."}
       </dd>
       <dt
         class="col-start-1 border-t border-primary/70 pt-3 text-neutral-content/60 first:border-none border-t border-primary/70 py-3"
@@ -162,9 +169,7 @@
       <dd
         class="pt-3 pb-3 col-start-2 col-span-2 border-t border-primary/70 border-t border-primary/70 py-3 nth-2:border-none text-right"
       >
-        {globalData.host?.os
-          ? globalData.host.os.platform
-          : "Loading..."}
+        {globalData.host?.os ? globalData.host.os.platform : "Loading..."}
       </dd>
       <dt
         class="col-start-1 border-t border-primary/70 pt-3 text-neutral-content/60 first:border-none border-t border-primary/70 py-3"
@@ -229,7 +234,9 @@
       <dd
         class="pt-3 pb-3 col-start-2 col-span-2 border-t border-primary/70 border-t border-primary/70 py-3 nth-2:border-none text-right"
       >
-        {dashboardData.unit_status.active_count !== null ? dashboardData.unit_status.active_count : "Loading..."}
+        {dashboardData.unit_status.active_count !== null
+          ? dashboardData.unit_status.active_count
+          : "Loading..."}
       </dd>
       <dt
         class="col-start-1 border-t border-primary/70 pt-3 text-neutral-content/60 first:border-none border-t border-primary/70 py-3"
@@ -237,12 +244,15 @@
         Failed Units
       </dt>
       <dd
-        class="pt-3 pb-3 col-start-2 col-span-2 border-t border-primary/70 border-t border-primary/70 py-3 nth-2:border-none text-right {dashboardData.unit_status.failed_count !==
-          null && dashboardData.unit_status.failed_count > 0
+        class="pt-3 pb-3 col-start-2 col-span-2 border-t border-primary/70 border-t border-primary/70 py-3 nth-2:border-none text-right {dashboardData
+          .unit_status.failed_count !== null &&
+        dashboardData.unit_status.failed_count > 0
           ? 'text-error'
           : ''}"
       >
-        {dashboardData.unit_status.failed_count !== null ? dashboardData.unit_status.failed_count : "Loading..."}
+        {dashboardData.unit_status.failed_count !== null
+          ? dashboardData.unit_status.failed_count
+          : "Loading..."}
       </dd>
     </dl>
     <div class="card-actions justify-end">
@@ -271,7 +281,9 @@
               class="h-2 rounded-full bg-primary"
             ></div>
           </div>
-          <div class=" col-span-2 text-right">{dashboardData.cpu}% of {dashboardData.cpu_count} CPUs</div>
+          <div class=" col-span-2 text-right">
+            {dashboardData.cpu}% of {dashboardData.cpu_count} CPUs
+          </div>
         </div>
       </dd>
       <dt
@@ -295,7 +307,6 @@
             {humanizeMemory(usedMemory() || 0)} ({usedMemoryPercentage()}%) of {humanizeMemory(
               dashboardData.memory_info?.total_bytes || 0,
             )}
-            
           </div>
         </div>
       </dd>
