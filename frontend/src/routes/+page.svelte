@@ -63,6 +63,7 @@
       .then((response) => response.json())
       .then((data) => {
         dashboardData.cpu = data.cpu;
+        dashboardData.cpu_count = data.cpu_count;
         dashboardData.load = data.load;
         dashboardData.unit_status = data.unit_status;
         dashboardData.physical_cores = data.physical_cores;
@@ -270,7 +271,7 @@
               class="h-2 rounded-full bg-primary"
             ></div>
           </div>
-          <div class=" col-span-2 text-right">{dashboardData.cpu}% of X CPUs</div>
+          <div class=" col-span-2 text-right">{dashboardData.cpu}% of {dashboardData.cpu_count} CPUs</div>
         </div>
       </dd>
       <dt
@@ -291,10 +292,10 @@
             ></div>
           </div>
           <div class=" col-span-2 text-right">
-            {humanizeMemory(usedMemory() || 0)} of {humanizeMemory(
+            {humanizeMemory(usedMemory() || 0)} ({usedMemoryPercentage()}%) of {humanizeMemory(
               dashboardData.memory_info?.total_bytes || 0,
             )}
-            {usedMemoryPercentage()}%
+            
           </div>
         </div>
       </dd>

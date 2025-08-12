@@ -49,11 +49,11 @@ func (h *DashboardModule) RegisterRoutes(ctx context.Context, parentRoute *echo.
 	go h.Poll()
 	routeGroup.GET("/events", echo.WrapHandler(h.sseHandler))
 	routeGroup.GET("/current", h.hostInfoHandler)
-	// cpustat, err := hardware.Info()
-	// if err != nil {
-	// 	slog.Error("failed to get cpu info", "error", err)
-	// }
-	//slog.Info("CPU Info", "info", cpustat, "count", len(cpustat))
+	cpustat, err := hardware.Info()
+	if err != nil {
+		slog.Error("failed to get cpu info", "error", err)
+	}
+	slog.Info("CPU Info", "count", len(cpustat))
 	failed, active, err := systemd.UnitOverview(ctx)
 	if err != nil {
 		slog.Error("failed to get systemd unit status", "error", err)
@@ -84,7 +84,8 @@ func (h *DashboardModule) RegisterRoutes(ctx context.Context, parentRoute *echo.
 		slog.Error("failed to get FQDN", "error", err)
 	}
 	hi := &cayman.HostState{
-		FQDN: domain,
+		FQDN:     domain,
+		CPUCount: len(cpustat),
 		UnitStatus: cayman.UnitStatus{
 			FailedCount: failed,
 			ActiveCount: active,

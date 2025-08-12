@@ -18,6 +18,7 @@ export interface HostState {
     fqdn: string; // Include FQDN
     load: Load;
     cpu: number /* int */; // Include CPU usage
+    cpu_count: number /* int */; // Include CPU count
     unit_status: UnitStatus; // Include unit status
     /**
      * CPUInfo       cpu.InfoStat             `json:"cpu_info"`       // Include CPU info

@@ -8,6 +8,7 @@ type HostState struct {
 	FQDN       string     `json:"fqdn"` // Include FQDN
 	Load       Load       `json:"load"`
 	CPU        int        `json:"cpu"`         // Include CPU usage
+	CPUCount   int        `json:"cpu_count"`   // Include CPU count
 	UnitStatus UnitStatus `json:"unit_status"` // Include unit status
 	// CPUInfo       cpu.InfoStat             `json:"cpu_info"`       // Include CPU info
 	PhysicalCores int                  `json:"physical_cores"` // Include physical cores
