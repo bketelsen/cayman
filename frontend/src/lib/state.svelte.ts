@@ -2,6 +2,7 @@ import type { GlobalData } from "./types";
 import type {HostInfo} from "./sysinfo.ts"
 import type {HostState} from "./cayman"
 import type {HostMemoryInfo} from "./sysinfo"
+import type {DockerInfo} from "./cayman.ts"
 
 
 // host is a field so it can be set in the store
@@ -19,6 +20,7 @@ export const dashboardData: HostState = $state({
         load15: 0
     },
     cpu: 0,
+    cpu_count: 0,
     unit_status: {
         failed_count: 0,
         active_count: 0
@@ -27,4 +29,10 @@ export const dashboardData: HostState = $state({
     logical_cores: 0,
     host_info: {} as HostInfo,
     memory_info: {} as HostMemoryInfo
+});
+
+export const dockerData: DockerInfo = $state({
+    containers: [],
+    images: [],
+
 });
