@@ -2,6 +2,7 @@ package docker
 
 import (
 	"cayman"
+	syssse "cayman/internal/sse"
 	"context"
 	"encoding/json"
 	"log/slog"
@@ -17,8 +18,9 @@ import (
 
 var (
 	// compile time check for Module interface
-	_       cayman.Module = (*DockerModule)(nil)
-	dModule *DockerModule
+	_         cayman.Module = (*DockerModule)(nil)
+	dModule   *DockerModule
+	topicHost = "docker"
 )
 
 func init() {
@@ -45,7 +47,7 @@ func (p *DockerModule) ShouldEnable() bool {
 }
 func (p *DockerModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Group) {
 	p.ctx = ctx
-	p.sse = newSSE()
+	p.sse = syssse.NewSSE(topicHost)
 	// Register Docker-specific routes here
 	routeGroup := parentRoute.Group("/virt/docker")
 	go p.Poll()

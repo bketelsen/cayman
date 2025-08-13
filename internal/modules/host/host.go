@@ -4,14 +4,17 @@ import (
 	"cayman"
 	"context"
 
+	syssse "cayman/internal/sse"
+
 	"github.com/labstack/echo/v4"
 	"github.com/tmaxmax/go-sse"
 )
 
 var (
 	// compile time check for Module interface
-	_       cayman.Module = (*HostModule)(nil)
-	hModule *HostModule
+	_         cayman.Module = (*HostModule)(nil)
+	hModule   *HostModule
+	topicHost = "host"
 )
 
 func init() {
@@ -30,7 +33,7 @@ func (p *HostModule) ShouldEnable() bool {
 }
 func (p *HostModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Group) {
 	p.ctx = ctx
-	p.sse = newSSE()
+	p.sse = syssse.NewSSE(topicHost)
 	// Register Podman-specific routes here
 	routeGroup := parentRoute.Group("/host")
 	go p.Poll()

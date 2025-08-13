@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"cayman"
+	syssse "cayman/internal/sse"
 	"context"
 
 	"github.com/labstack/echo/v4"
@@ -13,6 +14,7 @@ var (
 	_       cayman.Module = (*MetricsModule)(nil)
 	lModule *MetricsModule
 )
+var topicHost = "metrics"
 
 func init() {
 	lModule = &MetricsModule{}
@@ -30,7 +32,7 @@ func (p *MetricsModule) ShouldEnable() bool {
 }
 func (p *MetricsModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Group) {
 	p.ctx = ctx
-	p.sse = newSSE()
+	p.sse = syssse.NewSSE(topicHost)
 	// Register Logs-specific routes here
 	routeGroup := parentRoute.Group("/metrics")
 	go p.Poll()

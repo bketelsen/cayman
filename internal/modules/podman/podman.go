@@ -2,6 +2,7 @@ package podman
 
 import (
 	"cayman"
+	syssse "cayman/internal/sse"
 	"context"
 	"log/slog"
 
@@ -39,7 +40,7 @@ func (p *PodmanModule) ShouldEnable() bool {
 }
 func (p *PodmanModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Group) {
 	p.ctx = ctx
-	p.sse = newSSE()
+	p.sse = syssse.NewSSE("podman")
 	// Register Podman-specific routes here
 	routeGroup := parentRoute.Group("/virt/podman")
 	go p.Poll()

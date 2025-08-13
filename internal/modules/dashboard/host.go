@@ -5,6 +5,7 @@ import (
 	"cayman/internal/data/hardware"
 	"cayman/internal/data/system"
 	"cayman/internal/data/systemd"
+	syssse "cayman/internal/sse"
 	"context"
 	"encoding/json"
 	"log/slog"
@@ -18,6 +19,7 @@ import (
 var (
 	_          cayman.Module = (*DashboardModule)(nil)
 	dashModule *DashboardModule
+	topicHost  = "dashboard"
 )
 
 func init() {
@@ -44,7 +46,7 @@ func (h *DashboardModule) Name() string {
 
 func (h *DashboardModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Group) {
 	h.ctx = ctx
-	h.sseHandler = newSSE()
+	h.sseHandler = syssse.NewSSE(topicHost)
 	routeGroup := parentRoute.Group("/dashboard")
 	go h.Poll()
 	routeGroup.GET("/events", echo.WrapHandler(h.sseHandler))

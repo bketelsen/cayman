@@ -2,6 +2,7 @@ package storage
 
 import (
 	"cayman"
+	syssse "cayman/internal/sse"
 	"context"
 
 	"github.com/labstack/echo/v4"
@@ -13,6 +14,7 @@ var (
 	_       cayman.Module = (*StorageModule)(nil)
 	lModule *StorageModule
 )
+var topicHost = "storage"
 
 func init() {
 	lModule = &StorageModule{}
@@ -30,7 +32,7 @@ func (p *StorageModule) ShouldEnable() bool {
 }
 func (p *StorageModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Group) {
 	p.ctx = ctx
-	p.sse = newSSE()
+	p.sse = syssse.NewSSE(topicHost)
 	// Register Logs-specific routes here
 	routeGroup := parentRoute.Group("/storage")
 	go p.Poll()

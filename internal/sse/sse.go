@@ -1,4 +1,4 @@
-package podman
+package sse
 
 import (
 	"log/slog"
@@ -9,9 +9,7 @@ import (
 	"github.com/tmaxmax/go-sse"
 )
 
-var topicHost = "podman"
-
-func newSSE() *sse.Server {
+func NewSSE(topic string) *sse.Server {
 	rp, _ := sse.NewValidReplayer(time.Minute*5, true)
 	rp.GCInterval = time.Minute
 
@@ -27,8 +25,8 @@ func newSSE() *sse.Server {
 		OnSession: func(w http.ResponseWriter, r *http.Request) (topics []string, permitted bool) {
 			topics = []string{}
 
-			// add system topic
-			topics = append(topics, topicHost)
+			// add module topic
+			topics = append(topics, topic)
 
 			// the shutdown message is sent on the default topic
 			return append(topics, sse.DefaultTopic), true

@@ -2,6 +2,7 @@ package logs
 
 import (
 	"cayman"
+	syssse "cayman/internal/sse"
 	"context"
 
 	"github.com/labstack/echo/v4"
@@ -10,8 +11,9 @@ import (
 
 var (
 	// compile time check for Module interface
-	_       cayman.Module = (*LogsModule)(nil)
-	lModule *LogsModule
+	_         cayman.Module = (*LogsModule)(nil)
+	lModule   *LogsModule
+	topicHost = "logs"
 )
 
 func init() {
@@ -30,7 +32,7 @@ func (p *LogsModule) ShouldEnable() bool {
 }
 func (p *LogsModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Group) {
 	p.ctx = ctx
-	p.sse = newSSE()
+	p.sse = syssse.NewSSE(topicHost)
 	// Register Logs-specific routes here
 	routeGroup := parentRoute.Group("/logs")
 	go p.Poll()

@@ -47,3 +47,9 @@ export interface DockerInfo {
     containers: ContainerSummary[];
     images: ImageSummary[];
 }
+
+//////////
+// source: types_incus.go
+
+export interface IncusInfo {
+}

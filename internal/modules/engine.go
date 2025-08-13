@@ -6,6 +6,7 @@ import (
 	_ "cayman/internal/modules/dashboard"
 	_ "cayman/internal/modules/docker"
 	_ "cayman/internal/modules/host"
+	_ "cayman/internal/modules/incus"
 	_ "cayman/internal/modules/logs"
 	_ "cayman/internal/modules/metrics"
 	_ "cayman/internal/modules/podman"
