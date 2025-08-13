@@ -3,8 +3,13 @@ package docker
 import (
 	"cayman"
 	"context"
+	"encoding/json"
 	"log/slog"
+	"sort"
+	"time"
 
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 	"github.com/labstack/echo/v4"
 	"github.com/tmaxmax/go-sse"
@@ -56,9 +61,78 @@ func (p *DockerModule) Name() string {
 }
 
 func (p *DockerModule) Poll() {
-	// Logic to poll Docker for updates
+	ticker := time.NewTicker(3 * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-p.ctx.Done():
+			return
+		case <-ticker.C:
+			info, err := getDockerInfo()
+			if err != nil {
+				slog.Error("docker poll error", "error", err)
+				continue
+			}
+			cc, err := json.Marshal(info.Containers)
+			if err != nil {
+				slog.Error("docker marshal error", "error", err)
+				continue
+			}
+			event := &sse.Message{
+				Type: sse.Type("containers"),
+			}
+			event.AppendData(string(cc))
+			p.sse.Publish(event, topicHost)
+			ii, err := json.Marshal(info.Images)
+			if err != nil {
+				slog.Error("docker marshal error", "error", err)
+				continue
+			}
+			event = &sse.Message{
+				Type: sse.Type("images"),
+			}
+			event.AppendData(string(ii))
+			p.sse.Publish(event, topicHost)
+		}
+	}
 }
 func (p *DockerModule) dockerInfoHandler(c echo.Context) error {
-	// Logic to handle docker info requests
-	return nil
+	info, err := getDockerInfo()
+	if err != nil {
+		return c.JSON(500, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(200, info)
+}
+
+func getDockerInfo() (*cayman.DockerInfo, error) {
+	cli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		return nil, err
+	}
+	defer cli.Close()
+
+	containers, err := cli.ContainerList(context.Background(), container.ListOptions{All: true})
+	if err != nil {
+		return nil, err
+	}
+
+	// Sort containers by Created field in descending order (newest first)
+	sort.Slice(containers, func(i, j int) bool {
+		return containers[i].Created > containers[j].Created
+	})
+
+	images, err := cli.ImageList(context.Background(), image.ListOptions{All: true})
+	if err != nil {
+		return nil, err
+	}
+
+	// Sort images by Created field in descending order (newest first)
+	sort.Slice(images, func(i, j int) bool {
+		return images[i].Created > images[j].Created
+	})
+
+	return &cayman.DockerInfo{
+		Containers: containers,
+		Images:     images,
+	}, nil
 }
