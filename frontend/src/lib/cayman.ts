@@ -3,6 +3,8 @@ import type {HostInfo} from "./sysinfo.ts"
 import type {HostMemoryInfo} from "./sysinfo.ts"
 import type {Summary as ContainerSummary}  from "./dockercontainer.ts"
 import type {Summary as ImageSummary}  from "./dockerimage.ts"
+import type {InstanceFull} from "./incus.ts"
+import type {Image} from "./incus.ts"
 
 //////////
 // source: cayman.go
@@ -52,4 +54,6 @@ export interface DockerInfo {
 // source: types_incus.go
 
 export interface IncusInfo {
+    instances: InstanceFull[];
+    images: Image[];
 }

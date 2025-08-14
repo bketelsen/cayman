@@ -4,9 +4,14 @@ import (
 	"cayman"
 	syssse "cayman/internal/sse"
 	"context"
+	"encoding/json"
 	"log/slog"
 	"time"
 
+	"github.com/lxc/incus/v6/shared/api"
+	config "github.com/lxc/incus/v6/shared/cliconfig"
+
+	"github.com/bketelsen/inclient"
 	"github.com/labstack/echo/v4"
 	"github.com/tmaxmax/go-sse"
 )
@@ -29,8 +34,16 @@ type IncusModule struct {
 }
 
 func (p *IncusModule) ShouldEnable() bool {
-	slog.Info("docker socket found, enabling docker module")
-	return true
+	cfg, err := config.LoadConfig("")
+	if err != nil {
+		return false
+	}
+	client, err := inclient.NewClient(cfg)
+	if err != nil {
+		return false
+	}
+	_, err = client.Instances(context.Background())
+	return err == nil
 }
 func (p *IncusModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Group) {
 	p.ctx = ctx
@@ -57,21 +70,21 @@ func (p *IncusModule) Poll() {
 		case <-p.ctx.Done():
 			return
 		case <-ticker.C:
-			// info, err := getIncusInfo()
-			// if err != nil {
-			// 	slog.Error("incus poll error", "error", err)
-			// 	continue
-			// }
-			// cc, err := json.Marshal(info.Containers)
-			// if err != nil {
-			// 	slog.Error("docker marshal error", "error", err)
-			// 	continue
-			// }
-			// event := &sse.Message{
-			// 	Type: sse.Type("containers"),
-			// }
-			// event.AppendData(string(cc))
-			// p.sse.Publish(event, topicHost)
+			info, err := getIncusInfo()
+			if err != nil {
+				slog.Error("incus poll error", "error", err)
+				continue
+			}
+			cc, err := json.Marshal(info.Instances)
+			if err != nil {
+				slog.Error("incus marshal error", "error", err)
+				continue
+			}
+			event := &sse.Message{
+				Type: sse.Type("instances"),
+			}
+			event.AppendData(string(cc))
+			p.sse.Publish(event, topicHost)
 			// ii, err := json.Marshal(info.Images)
 			// if err != nil {
 			// 	slog.Error("docker marshal error", "error", err)
@@ -82,6 +95,7 @@ func (p *IncusModule) Poll() {
 			// }
 			// event.AppendData(string(ii))
 			// p.sse.Publish(event, topicHost)
+
 		}
 	}
 }
@@ -94,5 +108,21 @@ func (p *IncusModule) incusInfoHandler(c echo.Context) error {
 }
 
 func getIncusInfo() (*cayman.IncusInfo, error) {
-	return &cayman.IncusInfo{}, nil
+	cfg, err := config.LoadConfig("")
+	if err != nil {
+		return nil, err
+	}
+	client, err := inclient.NewClient(cfg)
+	if err != nil {
+		return nil, err
+	}
+	ii, err := client.Instances(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	return &cayman.IncusInfo{
+		Instances: ii,
+		Images:    []api.Image{},
+	}, nil
 }

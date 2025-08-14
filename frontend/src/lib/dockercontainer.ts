@@ -222,7 +222,7 @@ export interface MountPoint {
  * it's part of ContainerJSONBase and returned by "inspect" command
  */
 export interface State {
-    Status: string; // String representation of the container state. Can be one of "created", "running", "paused", "restarting", "removing", "exited", or "dead"
+    Status: ContainerState; // String representation of the container state. Can be one of "created", "running", "paused", "restarting", "removing", "exited", or "dead"
     Running: boolean;
     Paused: boolean;
     Restarting: boolean;
@@ -251,7 +251,7 @@ export interface Summary {
     SizeRw?: number /* int64 */;
     SizeRootFs?: number /* int64 */;
     Labels: { [key: string]: string};
-    State: string;
+    State: ContainerState;
     Status: string;
     HostConfig: {
         NetworkMode?: string;
@@ -346,6 +346,18 @@ export interface CreateResponse {
 }
 
 //////////
+// source: disk_usage.go
+
+/**
+ * DiskUsage contains disk usage for containers.
+ */
+export interface DiskUsage {
+    TotalSize: number /* int64 */;
+    Reclaimable: number /* int64 */;
+    Items: (Summary | undefined)[];
+}
+
+//////////
 // source: errors.go
 
 
@@ -370,11 +382,14 @@ export interface ExecOptions {
     AttachStdin: boolean; // Attach the standard input, makes possible user interaction
     AttachStderr: boolean; // Attach the standard error
     AttachStdout: boolean; // Attach the standard output
-    Detach: boolean; // Execute in detach mode
     DetachKeys: string; // Escape keys for detach
     Env: string[]; // Environment variables
     WorkingDir: string; // Working directory
     Cmd: string[]; // Execution commands and args
+    /**
+     * Deprecated: the Detach field is not used, and will be removed in a future release.
+     */
+    Detach: boolean;
 }
 /**
  * ExecStartOptions is a temp struct used by execStart
@@ -434,26 +449,31 @@ export interface FilesystemChange {
 // source: health.go
 
 /**
- * Health states
+ * HealthStatus is a string representation of the container's health.
+ * It currently is an alias for string, but may become a distinct type in future.
  */
-export const NoHealthcheck = "none"; // Indicates there is no healthcheck
+export type HealthStatus = string;
 /**
  * Health states
  */
-export const Starting = "starting"; // Starting indicates that the container is not yet ready
+export const NoHealthcheck: HealthStatus = "none"; // Indicates there is no healthcheck
 /**
  * Health states
  */
-export const Healthy = "healthy"; // Healthy indicates that the container is running correctly
+export const Starting: HealthStatus = "starting"; // Starting indicates that the container is not yet ready
 /**
  * Health states
  */
-export const Unhealthy = "unhealthy"; // Unhealthy indicates that the container has a problem
+export const Healthy: HealthStatus = "healthy"; // Healthy indicates that the container is running correctly
+/**
+ * Health states
+ */
+export const Unhealthy: HealthStatus = "unhealthy"; // Unhealthy indicates that the container has a problem
 /**
  * Health stores information about the container's healthcheck results
  */
 export interface Health {
-    Status: string; // Status is one of [Starting], [Healthy] or [Unhealthy].
+    Status: HealthStatus; // Status is one of [Starting], [Healthy] or [Unhealthy].
     FailingStreak: number /* int */; // FailingStreak is the number of consecutive failures
     Log: (HealthcheckResult | undefined)[]; // Log contains the last few results (oldest first)
 }
@@ -906,6 +926,30 @@ export interface Port {
      * Required: true
      */
     Type: string;
+}
+
+//////////
+// source: state.go
+
+/**
+ * ContainerState is a string representation of the container's current state.
+ * It currently is an alias for string, but may become a distinct type in the future.
+ */
+export type ContainerState = string;
+export const StateCreated: ContainerState = "created"; // StateCreated indicates the container is created, but not (yet) started.
+export const StateRunning: ContainerState = "running"; // StateRunning indicates that the container is running.
+export const StatePaused: ContainerState = "paused"; // StatePaused indicates that the container's current state is paused.
+export const StateRestarting: ContainerState = "restarting"; // StateRestarting indicates that the container is currently restarting.
+export const StateRemoving: ContainerState = "removing"; // StateRemoving indicates that the container is being removed.
+export const StateExited: ContainerState = "exited"; // StateExited indicates that the container exited.
+export const StateDead: ContainerState = "dead"; // StateDead indicates that the container failed to be deleted. Containers in this state are attempted to be cleaned up when the daemon restarts.
+/**
+ * StateStatus is used to return container wait results.
+ * Implements exec.ExitCode interface.
+ * This type is needed as State include a sync.Mutex field which make
+ * copying it unsafe.
+ */
+export interface StateStatus {
 }
 
 //////////

@@ -19,6 +19,18 @@ export interface DeleteResponse {
 }
 
 //////////
+// source: disk_usage.go
+
+/**
+ * DiskUsage contains disk usage for images.
+ */
+export interface DiskUsage {
+    TotalSize: number /* int64 */;
+    Reclaimable: number /* int64 */;
+    Items: (Summary | undefined)[];
+}
+
+//////////
 // source: image.go
 
 /**
@@ -188,7 +200,7 @@ export interface InspectResponse {
      * image, or as specified through MAINTAINER (deprecated) in the Dockerfile.
      */
     Author: string;
-    Config?: any /* container.Config */;
+    Config?: any /* dockerspec.DockerOCIImageConfig */;
     /**
      * Architecture is the hardware CPU architecture that the image runs on.
      */
@@ -429,6 +441,7 @@ export interface ListOptions {
     SharedSize: boolean;
     /**
      * ContainerCount indicates whether container count should be computed.
+     * Deprecated: This field has been unused and is no longer required and will be removed in a future version.
      */
     ContainerCount: boolean;
     /**
@@ -440,6 +453,7 @@ export interface ListOptions {
  * RemoveOptions holds parameters to remove images.
  */
 export interface RemoveOptions {
+    Platforms: any /* ocispec.Platform */[];
     Force: boolean;
     PruneChildren: boolean;
 }

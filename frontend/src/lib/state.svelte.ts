@@ -1,8 +1,9 @@
 import type { GlobalData } from "./types";
-import type {HostInfo} from "./sysinfo.ts"
-import type {HostState} from "./cayman"
-import type {HostMemoryInfo} from "./sysinfo"
-import type {DockerInfo} from "./cayman.ts"
+import type { HostInfo } from "./sysinfo.ts"
+import type { HostState } from "./cayman"
+import type { HostMemoryInfo } from "./sysinfo"
+import type { DockerInfo } from "./cayman.ts"
+import type { IncusInfo } from "./cayman.ts"
 
 
 // host is a field so it can be set in the store
@@ -33,6 +34,11 @@ export const dashboardData: HostState = $state({
 
 export const dockerData: DockerInfo = $state({
     containers: [],
+    images: [],
+
+});
+export const incusData: IncusInfo = $state({
+    instances: [],
     images: [],
 
 });

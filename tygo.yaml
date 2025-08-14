@@ -1,7 +1,7 @@
 # You can specify default mappings that will apply to all packages.
 type_mappings:
   time.Time: "string /* RFC3339 */"
-  
+
 # You can specify more than one package
 packages:
   # The package path just like you would import it in Go
@@ -23,6 +23,8 @@ packages:
       types.HostMemoryInfo: "HostMemoryInfo"
       container.Summary: "ContainerSummary"
       image.Summary: "ImageSummary"
+      api.InstanceFull: "InstanceFull"
+      api.Image: "Image"
 
     # This content will be put at the top of the output Typescript file, useful for importing custom types.
     frontmatter: |
@@ -30,7 +32,8 @@ packages:
       import type {HostMemoryInfo} from "./sysinfo.ts"
       import type {Summary as ContainerSummary}  from "./dockercontainer.ts"
       import type {Summary as ImageSummary}  from "./dockerimage.ts"
-
+      import type {InstanceFull} from "./incus.ts"
+      import type {Image} from "./incus.ts"
 
     # Filenames of Go source files that should not be included
     # in the output.
@@ -121,4 +124,30 @@ packages:
     # # Package that the generates Typescript types should extend. This is useful when
     # # attaching your types to a generic ORM.
     # extends: "SomeType"
-    
+  - path: "github.com/lxc/incus/v6/shared/api"
+
+    # Where this output should be written to.
+    # If you specify a folder it will be written to a file `index.ts` within that folder. By default it is written into the Golang package folder.
+    output_path: "frontend/src/lib/incus.ts"
+
+    # Customize the indentation (use \t if you want tabs)
+    indent: "    "
+
+    # Specify your own custom type translations, useful for custom types, `time.Time` and `null.String`.
+    # By default unrecognized types will be `any`.
+    # A mapping specified here will override one specified globally.
+    type_mappings:
+      time.Time: "string"
+
+    # This content will be put at the top of the output Typescript file, useful for importing custom types.
+    # frontmatter: |
+    #   "import {SomeType} from "../lib/sometype.ts"
+
+    # Filenames of Go source files that should not be included
+    # in the output.
+    # exclude_files:
+    #   - "private_stuff.go"
+
+    # # Package that the generates Typescript types should extend. This is useful when
+    # # attaching your types to a generic ORM.
+    # extends: "SomeType"
