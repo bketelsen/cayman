@@ -10,9 +10,7 @@ import (
 	"github.com/tmaxmax/go-sse"
 )
 
-var (
-	sseServer *sse.Server
-)
+var sseServer *sse.Server
 
 const (
 	topicSystem = "system"

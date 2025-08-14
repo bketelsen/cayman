@@ -1,6 +1,14 @@
 package modules
 
 import (
+	"context"
+	"errors"
+	"log/slog"
+	"net"
+	"net/http"
+	"strings"
+	"time"
+
 	"cayman"
 	"cayman/frontend"
 	_ "cayman/internal/modules/dashboard"
@@ -12,15 +20,8 @@ import (
 	_ "cayman/internal/modules/podman"
 	_ "cayman/internal/modules/storage"
 	_ "cayman/internal/modules/system"
-	"strings"
 
 	"cayman/internal/system"
-	"context"
-	"errors"
-	"log/slog"
-	"net"
-	"net/http"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -103,7 +104,7 @@ func (e *Engine) Start(ctx context.Context) error {
 		return c.JSON(http.StatusOK, false)
 	})
 	// register api and sse routes for modules here
-	//dashboard.RegisterRoutes(ctx, api)
+	// dashboard.RegisterRoutes(ctx, api)
 	slog.Info("registering modules")
 
 	slog.Info("available modules", "count", len(cayman.AvailableModules))

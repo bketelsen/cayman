@@ -1,13 +1,14 @@
 package docker
 
 import (
-	"cayman"
-	syssse "cayman/internal/sse"
 	"context"
 	"encoding/json"
 	"log/slog"
 	"sort"
 	"time"
+
+	"cayman"
+	syssse "cayman/internal/sse"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
@@ -45,6 +46,7 @@ func (p *DockerModule) ShouldEnable() bool {
 	slog.Info("docker socket found, enabling docker module")
 	return true
 }
+
 func (p *DockerModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Group) {
 	p.ctx = ctx
 	p.sse = syssse.NewSSE(topicHost)
@@ -54,6 +56,7 @@ func (p *DockerModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Gro
 	routeGroup.GET("/events", echo.WrapHandler(p.sse))
 	routeGroup.GET("/current", p.dockerInfoHandler)
 }
+
 func (p *DockerModule) Topics() []string {
 	return []string{"docker"}
 }
@@ -98,6 +101,7 @@ func (p *DockerModule) Poll() {
 		}
 	}
 }
+
 func (p *DockerModule) dockerInfoHandler(c echo.Context) error {
 	info, err := getDockerInfo()
 	if err != nil {

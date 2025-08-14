@@ -1,9 +1,10 @@
 package logs
 
 import (
+	"context"
+
 	"cayman"
 	syssse "cayman/internal/sse"
-	"context"
 
 	"github.com/labstack/echo/v4"
 	"github.com/tmaxmax/go-sse"
@@ -30,6 +31,7 @@ func (p *LogsModule) ShouldEnable() bool {
 	// Logic to determine if the Logs module should be enabled
 	return true
 }
+
 func (p *LogsModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Group) {
 	p.ctx = ctx
 	p.sse = syssse.NewSSE(topicHost)
@@ -39,6 +41,7 @@ func (p *LogsModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Group
 	routeGroup.GET("/events", echo.WrapHandler(p.sse))
 	routeGroup.GET("/current", p.logsInfoHandler)
 }
+
 func (p *LogsModule) Topics() []string {
 	return []string{"logs"}
 }
@@ -50,6 +53,7 @@ func (p *LogsModule) Name() string {
 func (p *LogsModule) Poll() {
 	// Logic to poll Logs for updates
 }
+
 func (p *LogsModule) logsInfoHandler(c echo.Context) error {
 	// Logic to handle logs info requests
 	return nil

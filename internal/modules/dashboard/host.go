@@ -1,15 +1,16 @@
 package dashboard
 
 import (
+	"context"
+	"encoding/json"
+	"log/slog"
+	"time"
+
 	"cayman"
 	"cayman/internal/data/hardware"
 	"cayman/internal/data/system"
 	"cayman/internal/data/systemd"
 	syssse "cayman/internal/sse"
-	"context"
-	"encoding/json"
-	"log/slog"
-	"time"
 
 	"github.com/elastic/go-sysinfo/types"
 	"github.com/labstack/echo/v4"
@@ -36,6 +37,7 @@ type DashboardModule struct {
 func (h *DashboardModule) ShouldEnable() bool {
 	return true
 }
+
 func (h *DashboardModule) Topics() []string {
 	return []string{topicHost}
 }
@@ -73,7 +75,6 @@ func (h *DashboardModule) RegisterRoutes(ctx context.Context, parentRoute *echo.
 		loadavg, err := loadaverage.LoadAverage()
 		if err != nil {
 			slog.Error("failed to get load", "error", err)
-
 		}
 		tmpLoad = cayman.Load{
 			Load1:  loadavg.One,
@@ -98,7 +99,6 @@ func (h *DashboardModule) RegisterRoutes(ctx context.Context, parentRoute *echo.
 		MemoryInfo: *mem,
 	}
 	h.info = hi
-
 }
 
 func (h *DashboardModule) Poll() {
@@ -120,7 +120,6 @@ func (h *DashboardModule) usage() {
 	usage, err := hardware.CPUUsage(h.ctx)
 	if err != nil {
 		slog.Error("failed to get cpu usage", "error", err)
-
 	}
 
 	e := &sse.Message{
@@ -150,7 +149,6 @@ func (h *DashboardModule) stats() {
 		loadavg, err := loadaverage.LoadAverage()
 		if err != nil {
 			slog.Error("failed to get load", "error", err)
-
 		}
 		tmpLoad = cayman.Load{
 			Load1:  loadavg.One,
@@ -181,7 +179,7 @@ func (h *DashboardModule) stats() {
 
 	_ = h.sseHandler.Publish(e, topicHost)
 }
-func (h *DashboardModule) hostInfoHandler(c echo.Context) error {
 
+func (h *DashboardModule) hostInfoHandler(c echo.Context) error {
 	return c.JSON(200, h.info)
 }

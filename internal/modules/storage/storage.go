@@ -1,9 +1,10 @@
 package storage
 
 import (
+	"context"
+
 	"cayman"
 	syssse "cayman/internal/sse"
-	"context"
 
 	"github.com/labstack/echo/v4"
 	"github.com/tmaxmax/go-sse"
@@ -30,6 +31,7 @@ func (p *StorageModule) ShouldEnable() bool {
 	// Logic to determine if the Logs module should be enabled
 	return true
 }
+
 func (p *StorageModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Group) {
 	p.ctx = ctx
 	p.sse = syssse.NewSSE(topicHost)
@@ -39,6 +41,7 @@ func (p *StorageModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Gr
 	routeGroup.GET("/events", echo.WrapHandler(p.sse))
 	routeGroup.GET("/current", p.storageInfoHandler)
 }
+
 func (p *StorageModule) Topics() []string {
 	return []string{"storage"}
 }
@@ -50,6 +53,7 @@ func (p *StorageModule) Name() string {
 func (p *StorageModule) Poll() {
 	// Logic to poll Storage for updates
 }
+
 func (p *StorageModule) storageInfoHandler(c echo.Context) error {
 	// Logic to handle storage info requests
 	return nil

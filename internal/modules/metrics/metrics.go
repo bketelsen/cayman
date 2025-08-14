@@ -1,9 +1,10 @@
 package metrics
 
 import (
+	"context"
+
 	"cayman"
 	syssse "cayman/internal/sse"
-	"context"
 
 	"github.com/labstack/echo/v4"
 	"github.com/tmaxmax/go-sse"
@@ -30,6 +31,7 @@ func (p *MetricsModule) ShouldEnable() bool {
 	// Logic to determine if the Logs module should be enabled
 	return true
 }
+
 func (p *MetricsModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Group) {
 	p.ctx = ctx
 	p.sse = syssse.NewSSE(topicHost)
@@ -39,6 +41,7 @@ func (p *MetricsModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Gr
 	routeGroup.GET("/events", echo.WrapHandler(p.sse))
 	routeGroup.GET("/current", p.metricsInfoHandler)
 }
+
 func (p *MetricsModule) Topics() []string {
 	return []string{"metrics"}
 }
@@ -50,6 +53,7 @@ func (p *MetricsModule) Name() string {
 func (p *MetricsModule) Poll() {
 	// Logic to poll Metrics for updates
 }
+
 func (p *MetricsModule) metricsInfoHandler(c echo.Context) error {
 	// Logic to handle metrics info requests
 	return nil

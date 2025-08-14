@@ -12,7 +12,7 @@ tasks:
   fmt:
     desc: gofumpt all code
     cmds:
-      - gofumpt -w -l .
+      - go tool gofumpt -w -l .
 
   build:
     desc: Build backend with embedded frontend

@@ -1,13 +1,14 @@
 package main
 
 import (
-	"cayman/internal/modules"
 	"context"
 	"flag"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"cayman/internal/modules"
 )
 
 func main() {

@@ -1,8 +1,9 @@
 package host
 
 import (
-	"cayman"
 	"context"
+
+	"cayman"
 
 	syssse "cayman/internal/sse"
 
@@ -31,6 +32,7 @@ func (p *HostModule) ShouldEnable() bool {
 	// Logic to determine if the Podman module should be enabled
 	return true
 }
+
 func (p *HostModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Group) {
 	p.ctx = ctx
 	p.sse = syssse.NewSSE(topicHost)
@@ -40,6 +42,7 @@ func (p *HostModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Group
 	routeGroup.GET("/events", echo.WrapHandler(p.sse))
 	routeGroup.GET("/current", p.hostInfoHandler)
 }
+
 func (p *HostModule) Topics() []string {
 	return []string{"host"}
 }
@@ -51,6 +54,7 @@ func (p *HostModule) Name() string {
 func (p *HostModule) Poll() {
 	// Logic to poll Host for updates
 }
+
 func (p *HostModule) hostInfoHandler(c echo.Context) error {
 	// Logic to handle host info requests
 	return nil

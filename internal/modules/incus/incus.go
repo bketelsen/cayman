@@ -1,12 +1,13 @@
 package incus
 
 import (
-	"cayman"
-	syssse "cayman/internal/sse"
 	"context"
 	"encoding/json"
 	"log/slog"
 	"time"
+
+	"cayman"
+	syssse "cayman/internal/sse"
 
 	"github.com/lxc/incus/v6/shared/api"
 	config "github.com/lxc/incus/v6/shared/cliconfig"
@@ -45,6 +46,7 @@ func (p *IncusModule) ShouldEnable() bool {
 	_, err = client.Instances(context.Background())
 	return err == nil
 }
+
 func (p *IncusModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Group) {
 	p.ctx = ctx
 	p.sse = syssse.NewSSE(topicHost)
@@ -54,6 +56,7 @@ func (p *IncusModule) RegisterRoutes(ctx context.Context, parentRoute *echo.Grou
 	routeGroup.GET("/events", echo.WrapHandler(p.sse))
 	routeGroup.GET("/current", p.incusInfoHandler)
 }
+
 func (p *IncusModule) Topics() []string {
 	return []string{"incus"}
 }
@@ -99,6 +102,7 @@ func (p *IncusModule) Poll() {
 		}
 	}
 }
+
 func (p *IncusModule) incusInfoHandler(c echo.Context) error {
 	info, err := getIncusInfo()
 	if err != nil {
